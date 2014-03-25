@@ -1,0 +1,38 @@
+#Zookeeper Server Vars Settings
+
+# Set Zookeeper Version. Below download url will fetch the extact version from zookeeper stable section
+zookeeper_version: zookeeper-3.4.5
+
+# Set zookeeper download path
+zookeeper_home_path: /opt
+
+# Install list of below mentioned packages
+install_list: [checkinstall, htop, curl, net-tools, liblzo2-dev, zip, git, python-pycurl, software-properties-common, openjdk-7-jdk]
+
+# User can modify below variables if any changes required.
+#zookeeper downlod url using CURL
+zookeeper_download_url: 'http://mirror.olnevhost.net/pub/apache/zookeeper/{{ zookeeper_version }}/{{ zookeeper_version }}.tar.gz'
+
+#zookeeper Conf Dir path
+zookeeper_conf_dir: '{{zookeeper_home_path}}/{{zookeeper_version}}/conf/'
+
+#zookeeper sample conf file comes along with download package
+zookeeper_sample_conf_file: zoo_sample.cfg
+
+# zookeeper conf file name
+zookeeper_conf_file:  zoo.cfg
+
+#zookeeper bin dir
+zookeeper_bin_dir: '{{zookeeper_home_path}}/{{zookeeper_version}}/bin/'
+
+#zookeeper start script
+zookeeper_start_script: './zkServer.sh'
+
+#zookeeper template file
+zookeeper_template_file: '{{zookeeper_conf_file }}'
+
+#zookeeper dest conf file
+zookeeper_dest_conf_file: '{{ zookeeper_conf_dir }}{{zookeeper_conf_file }}'
+
+#zookeeper myid file path
+zookeeper_myid_file: '/var/lib/zookeeper/myid'

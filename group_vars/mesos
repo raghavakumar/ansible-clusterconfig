@@ -1,0 +1,48 @@
+#hadoop Server vars
+
+# common section (common.yml)
+#set name
+mesos_name: mesos
+
+# Set hadoop version
+mesos_version: 0.13.0
+
+# Set hadoop version
+mesos_version_package: '{{ mesos_name }}-{{ mesos_version }}.tar.gz'
+
+# mesos download path
+mesos_download_path: '/opt'
+
+mesos_path: '{{ mesos_download_path }}/{{ mesos_name }}'
+
+mesos_launch_dir: '{{ mesos_path }}/src'
+
+# Set whether mesos to be download from external url: Download from external url if set to "false". Download from template path if set to "true"
+mesos_download_status: false
+
+#mesos base url
+mesos_base_url: 'http://archive.apache.org/dist/mesos'
+
+#mesos download url
+mesos_download_url: '{{ mesos_base_url }}/{{ mesos_version }}/{{ mesos_name }}-{{ mesos_version }}.tar.gz'
+
+#mesos template package
+template_mesos_package: '{{ mesos_version_package }}'
+
+# packages section (packages.yml)
+
+# Install list of below mentioned packages
+package_first_list: [wget, curl, g++, gcc, python-software-properties, software-properties-common]
+
+# add repository
+repositoryname: 'ppa:fkrull/deadsnakes'
+
+# Install list of below mentioned packages after doing apt-get update
+package_second_list: [python2.7-dev, python-all-dev, libcppunit-dev, autoconf, autotools-dev, libltdl-dev, libtool, autopoint, make, build-essential, libtool, gcc-4.6-base, cpp-4.6, libgomp1,libquadmath0, libc6-dev, libcurl4-openssl-dev, python-setuptools, python-dev, libcurl4-openssl-dev, libsasl2-2, libsasl2-dev, libcurl3]
+
+# deploy section
+
+template_mesos_master_conf: 'mesos-master.j2'
+template_mesos_slave_conf: 'mesos-slave.j2'
+mesos_master_conf_dest_path: '/etc/init/mesos-master.conf'
+mesos_slave_conf_dest_path: '/etc/init/mesos-slave.conf'

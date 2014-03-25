@@ -1,0 +1,21 @@
+#mesos-master.conf
+
+description "mesos master"
+
+start on runlevel [2345]
+respawn
+
+script
+  [ ! -f /etc/default/mesos ]     || . /etc/default/mesos
+  [ ! -f /etc/mesos/master.conf ] || . /etc/mesos/master.conf
+  [ -z "${ULIMIT:-}" ] || ulimit $ULIMIT  
+  
+  cd "/opt/mesos/bin/"
+  echo "[INFO] start mesos master server"
+  ./mesos-master.sh --ip={{ inventory_hostname }} --cluster=master
+  echo "[INFO] Wait few secs after starting service"
+  sleep 5
+  echo "[INFO] Start service"  
+  sleep 1
+  exit;
+end script

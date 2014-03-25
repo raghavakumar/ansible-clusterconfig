@@ -1,0 +1,7 @@
+---
+#include required ymls: common, packages,deploy
+- include: common.yml
+
+- include: packages.yml
+
+- include: deploy.yml

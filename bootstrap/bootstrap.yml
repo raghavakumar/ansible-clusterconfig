@@ -1,0 +1,31 @@
+---
+# Ansible Bootstrap
+# =================
+
+# Found on the ansible mailing list and adopted
+
+# Creates the 'ansibler' user and adds him to the 'sudo' group. Then concatenates ansible_rsa.pub to
+# the ~/.ssh/authorized_keys on the target instance with group 'sudo'. Then make sure that sudoers is set to allow
+# NOPASSWD from sudo, and run everything else with ansible with 'user: ansibler' and sudo:true. This way, all ansible
+# activity is logged, and we can specifically revoke the key (and terminate ansible's control) if either
+# (a) security is compromised or (b) we hand over control of an instance to a client.
+
+- hosts: all
+  sudo: true
+  vars:
+    - authorized_rsa_key: "{{ lookup('file', 'ansible_rsa.pub') }}"
+  tasks:
+    - name: hostname should match inventory name
+      hostname: name={{ inventory_hostname }}
+
+    - name: create user 'clusterconfig'
+      user: name=clusterconfig groups=sudo generate_ssh_key=yes shell=/bin/sh
+
+    - name: add 'clusterconfig' RSA SSH key
+      authorized_key: user=clusterconfig key="{{ authorized_rsa_key }}"
+
+    - name: change sudoers to contains NOPASSWD for sudo group
+      shell: "creates=/etc/sudoers.bak chdir=/etc cp sudoers sudoers.bak && sed -ri -e 's/(%sudo\\s+ALL=\\(ALL:ALL\\))\\s+ALL/\\1 NOPASSWD: ALL/' /etc/sudoers"
+
+    - name: install python-keyczar via apt (for Ansible's Accelerated Mode)
+      apt: pkg=python-keyczar

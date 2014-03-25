@@ -1,0 +1,29 @@
+---
+# file: roles/zookeepers/tasks/main.yml
+- name: Step 1 | Update All Package
+  command: apt-get update
+  tags: zookeepers
+
+- name: Step 2 | Install required packages
+  apt: pkg={{ item }} state=present
+  with_items:  $install_list
+  tags: zookeepers
+
+- name: Step 3 | install zookeeper-server via curl
+  shell: chdir={{ zookeeper_home_path }} curl {{ zookeeper_download_url }} | tar xz && sudo chmod -R 655 '{{zookeeper_version }}/' && cd '{{ zookeeper_conf_dir }}' && sudo cp '{{ zookeeper_sample_conf_file }}' '{{ zookeeper_conf_file }}' && cd '{{ zookeeper_bin_dir }}' && sudo '{{ zookeeper_start_script }}' start
+  tags: zookeepers
+  
+- name: Step 4 | configure ZooKeeper in required path
+  template: src='{{ zookeeper_template_file }}' dest='{{ zookeeper_dest_conf_file }}' mode=0644  
+  notify: start zookeeper
+  tags: zookeepers
+  
+- name: Step 5 | initialize ZooKeeper
+  #shell: creates=/var/lib/zookeeper/myid sudo touch /var/lib/zookeeper/myid
+  command: sudo /usr/bin/touch '{{ zookeeper_myid_file }}'
+  tags: zookeepers
+  
+- name: Step 6 | add a string to the new file [/var/lib/zookeeper/myid]
+  lineinfile: dest='{{ zookeeper_myid_file }}' regexp='^' line={{ zookeeper_id }} state=present
+  notify: restart zookeeper
+  tags: zookeepers 

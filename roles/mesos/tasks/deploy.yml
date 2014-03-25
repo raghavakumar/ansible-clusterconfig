@@ -1,0 +1,100 @@
+---
+
+- name: Deploy step 1 | Check whether /opt/mesos folder exists
+  stat: path='{{ mesos_path }}'
+  register: check_path
+  tags: mesos
+ 
+- name: Deploy step 2 | /opt/mesos folder exists
+  debug: msg="/opt/mesos folder exists"
+  when: check_path|success  
+  tags: mesos
+
+- name: Deploy step 3 | build the source
+  debug: msg="/opt/mesos folder exists"
+  register: configstatus
+  when: check_path|success
+  tags: mesos
+
+- name: Deploy step 4 | configuration status success
+  debug: msg="configuration status success"
+  when: configstatus|success  
+  tags: mesos
+ 
+- name: Deploy step 5 | configuration status failed
+  debug: msg="config status failed"
+  when: configstatus|failed
+  tags: mesos
+  
+- name: Deploy step 6 | execute make command after configuration status success
+  #shell: make -j4 chdir='{{ mesos_path }}'
+  debug: msg="/opt/mesos folder exists"
+  register: makestatus
+  when: configstatus|success  
+  tags: mesos
+
+- name: Deploy step 7 | make install after make success
+  debug: msg="make status success"
+  when: makestatus|success  
+  tags: mesos
+ 
+- name: Deploy step 8 | make after config failed
+  debug: msg="config status failed"
+  when: makestatus|failed
+  tags: mesos
+  
+- name: Deploy step 9 | make install after make sucess
+  #shell: make install chdir='{{ mesos_path }}' 
+  debug: msg="/opt/mesos folder exists"
+  register: makeinstallstatus
+  when: makestatus|success  
+  tags: mesos
+ 
+- name: Deploy step 10 | make install success
+  debug: msg="make install status success"
+  when: makeinstallstatus|success  
+  tags: mesos
+ 
+- name: Deploy step 11 | make install failed
+  debug: msg="make install status failed"
+  when: makeinstallstatus|failed  
+  tags: mesos
+ 
+- name: Deploy step 12 | Check whether /opt/mesos/bin/mesos-slave-flags.sh folder exists
+  stat: path='{{ mesos_path }}/bin/mesos-slave-flags.sh'
+  register: check_mesos_slave_flags_path
+  tags: mesos
+  
+- name: Deploy step 13 | /opt/mesos/bin/mesos-slave-flags.sh not exists
+  debug: msg="/opt/mesos/bin/mesos-slave-flags.sh not exists"
+  when: check_mesos_slave_flags_path|failed
+  tags: mesos
+
+- name: Deploy step 14 | delete existing mesos-slave-flags.sh file, if file exists
+  command: rm -rf '{{ mesos_path }}/bin/mesos-slave-flags.sh'
+  when: check_mesos_slave_flags_path|success  
+  tags: mesos
+  
+- name: Deploy step 15 | add new line to mesos-slave-flags.sh file
+  lineinfile: create=yes dest='{{ mesos_path }}/bin/mesos-slave-flags.sh' line='export MESOS_LAUNCHER_DIR={{ mesos_launch_dir }}' insertafter=EOF
+  tags: mesos
+
+- name: Deploy step 16 | configure Mesos master script and set as a service
+  template: src='{{ template_mesos_master_conf }}' dest='{{ mesos_master_conf_dest_path }}'
+  notify:
+    - Restart mesos-master
+  tags: mesos
+
+- name: Deploy step 17 | configure Mesos slave script and set as a service
+  template: src='{{ template_mesos_slave_conf }}' dest='{{ mesos_slave_conf_dest_path }}'
+  notify:
+    - Restart mesos-slave
+  tags: mesos  
+  
+- name: Deploy step 18 | make sure mesos-master is up and running
+  service: name=mesos-master state=started enabled=yes sleep=5  
+  tags: mesos
+
+- name: Deploy step 19 | make sure mesos-slave is up and running
+  service: name=mesos-slave state=started enabled=yes sleep=5  
+  tags: mesos

@@ -1,0 +1,13 @@
+[zookeepers]
+192.168.2.24 zookeeper_id=1 ansible_connection=ssh ansible_ssh_user=pramati ansible_ssh_pass=pramati123
+192.168.2.25 zookeeper_id=2 ansible_connection=ssh ansible_ssh_user=pramati ansible_ssh_pass=pramati123
+
+[cassandras]
+192.168.2.24 ansible_connection=ssh ansible_ssh_user=pramati ansible_ssh_pass=pramati123
+192.168.2.25 ansible_connection=ssh ansible_ssh_user=pramati ansible_ssh_pass=pramati123
+
+[cassandras_seeds]
+192.168.2.24 ansible_connection=ssh ansible_ssh_user=pramati ansible_ssh_pass=pramati123
+
+[spark]
+192.168.2.30 ansible_connection=ssh ansible_ssh_user=pramati ansible_ssh_pass=pramati123

@@ -1,0 +1,4 @@
+192.168.2.24 ansible_connection=ssh ansible_ssh_user=pramati ansible_ssh_pass=pramati123
+192.168.2.25 ansible_connection=ssh ansible_ssh_user=pramati ansible_ssh_pass=pramati123
+192.168.2.26 ansible_connection=ssh ansible_ssh_user=pramati ansible_ssh_pass=pramati123
+192.168.2.30 ansible_connection=ssh ansible_ssh_user=pramati ansible_ssh_pass=pramati123

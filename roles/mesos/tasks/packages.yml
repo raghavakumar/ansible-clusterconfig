@@ -1,0 +1,22 @@
+---
+- name: Package Step 1 | Update apt-get
+  shell: sudo apt-get update
+  tags: mesos
+  
+- name: Package Step 2 | Install os packages
+  apt: pkg={{item}} state=present update_cache=yes
+  with_items:  $package_first_list 
+  tags: mesos
+  
+- name: Package Step 3 | Add required repository to sources
+  action: apt_repository repo='{{ repositoryname }}'
+  tags: mesos
+
+- name: Package Step 4 | Update apt-get
+  shell: sudo apt-get update
+  tags: mesos
+
+- name: Package Step 5 | Install os packages after doing update
+  apt: pkg={{item}} state=present update_cache=yes
+  with_items:  $package_second_list
+  tags: mesos

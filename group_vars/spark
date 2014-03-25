@@ -1,0 +1,43 @@
+# spark vars
+
+# set name
+name: spark
+
+# Set spark version
+spark_version: 0.9.0
+
+# Set spark version
+
+spark_version_zip_package: '{{ name }}-{{ spark_version }}-incubating.tgz'
+spark_version_package: '{{ name }}-{{ spark_version }}-incubating'
+
+# spark download path
+spark_download_dir: '/home/pramati'
+
+spark_path: '{{ spark_download_dir }}/{{ spark_version_package }}'
+spark_version_zip_downloadpath: '{{ spark_download_dir }}/{{ spark_version_zip_package }}'
+
+spark_conf_dir: '{{ spark_path }}/conf'
+spark_bin_dir: '{{ spark_path }}/bin'
+
+# Set whether spark to be download from external url: Download from external url if set to "false". Download from template path if set to "true"
+spark_download_status: false
+
+#spark base url
+spark_base_url: 'http://d3kbcqa49mib13.cloudfront.net'
+
+#spark download url
+spark_download_url: '{{ spark_base_url }}/{{ spark_version_zip_package }}'
+
+#spark template package
+template_spark_package: '{{ spark_version_zip_package }}'
+
+template_spark_env: 'spark-env.sh'
+spark_env_dest_path: '{{ spark_conf_dir }}/spark-env.sh'
+
+# set hadoop configuration path
+hadoop_path: '/usr/local'
+hadoop_verify_dir_status: '{{ hadoop_path }}/hadoop/bin/hadoop fs -ls /test'
+hadoop_verify_zipdir_status: '{{ hadoop_path }}/hadoop/bin/hadoop fs -ls /test/spark-0.9.0-incubating.tgz'
+hadoop_mkdir_cmd: '{{ hadoop_path }}/hadoop/bin/hadoop fs -mkdir /test'
+hadoop_put_cmd: '{{ hadoop_path }}/hadoop/bin/hadoop fs -put spark-0.9.0-incubating.tgz /test'

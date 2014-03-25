@@ -1,0 +1,121 @@
+---
+# file: roles/hadoop/tasks/main.yml
+
+- name: Step 1 | Update apt-get
+  shell: sudo apt-get update
+  tags: hadoop
+  
+#- name: Step 2 | Install requried Softwares
+#  apt: pkg={{ item }} state=present
+#  with_items:  $install_list
+#  tags: hadoop
+  
+- name: Step 3 | delete existing in .ssh
+  shell: sudo rm -rf /home/{{ ansible_ssh_user }}/.ssh/{{ item }}
+  with_items:
+     - id_dsa
+     - id_dsa.pub
+     - authorized_keys
+     - known_hosts
+  tags: hadoop
+  
+- name: Step 4 | Generate id_dsa.pub and add localhost entry to known_hosts
+  shell: sudo ssh-keygen -t dsa -P '' -f /home/{{ ansible_ssh_user }}/.ssh/id_dsa && sudo cat /home/{{ ansible_ssh_user }}/.ssh/id_dsa.pub >> /home/{{ ansible_ssh_user }}/.ssh/authorized_keys && sudo ssh-keyscan localhost >> /home/{{ ansible_ssh_user }}/.ssh/known_hosts && sudo chown -R {{ ansible_ssh_user }}:root /home/{{ ansible_ssh_user }}/.ssh
+  tags: hadoop
+  
+- name: Step 5 | Copy hadoop package from template src IF hadoop_download_local varaible set to true
+  template: src={{ item.src }} dest={{ item.dest }} mode=0644 
+  with_items:
+    - { src: '{{ template_hadoop_package }}', dest: '{{ hadoop_path }}' }
+  when: hadoop_download_local
+  tags: hadoop
+  
+- name: Step 6 | Download hadoop from external url IF hadoop_download_local variable set to false
+  get_url: url={{ hadoop_download_url }} dest={{ hadoop_download_path }} mode=655  
+  when: not hadoop_download_local
+  tags: hadoop
+
+- name: Step 7 | /app/hadoop/ delete if exists   
+  file: name=/app/hadoop state=absent
+  tags: hadoop  
+  
+  #&& sudo rm -rf *.tar.gz *.tar.gz*
+  
+- name: Step 8 | Install hadoop
+  shell: creates=hadoop chdir={{ hadoop_path }} sudo cp '{{ hadoop_download_path }}/{{ hadoop_version_package }}' '{{ hadoop_version_package }}' && sudo tar -xvzf '{{ hadoop_version_package }}' && sudo rm -rf *.tar.gz *.tar.gz* && sudo mv {{ hadoop_version }} '{{ hadoop_path }}/hadoop' && sudo chmod -R 777 '{{ hadoop_path }}/hadoop' && sudo chown -R {{ ansible_ssh_user }}:root '{{ hadoop_path }}/hadoop'
+  tags: hadoop
+
+- name: step 9 | copy .bash_aliases template file to user home location
+  template: src='{{ template_bash_aliases }}' dest='{{ user_bashpath }}'
+  sudo: False
+  tags: hadoop
+  
+- name: step 10 | copy hadoop-env.sh template file to /usr/local/hadoop/conf location
+  template: src='{{ template_hadoop_env_file }}' dest='{{ hadoop_path }}/hadoop/conf/' mode=777  
+  tags: hadoop
+  
+- name: Step 11 | set hadoop data dir
+  shell: creates='{{ hadoop_data_dir }}'  sudo mkdir -p '{{ hadoop_data_dir }}' && sudo chown -R {{ ansible_ssh_user }}:root '{{ hadoop_data_dir }}' && sudo chmod -R 777 '{{ hadoop_data_dir }}'
+  tags: hadoop
+
+- name: Step 12 | Copy hadoop conf files
+  template: src={{ item.src }} dest={{ item.dest }} mode=0644 
+  with_items:
+    - { src: '{{ template_hadoop_core_site_xmlfile }}', dest: '{{ hadoop_conf_path }}/{{ template_hadoop_core_site_xmlfile }}' }
+    - { src: '{{ template_hadoop_hdfs_site_xmlfile }}', dest: '{{ hadoop_conf_path }}/{{ template_hadoop_hdfs_site_xmlfile }}' }  
+    - { src: '{{ template_hadoop_mapred_site_xmlfile }}', dest: '{{ hadoop_conf_path }}/{{ template_hadoop_mapred_site_xmlfile }}' }  
+  tags: hadoop
+  
+- name: Step 13 | namenode format
+  command: '{{ hadoop_namenode_cmd }} -format'
+  sudo: False
+
+- name: Step 14 | simulate long running op (15 sec), wait for up to 45, poll every 5
+  command: /bin/sleep 15
+  async: 45
+  poll: 5
+  tags: hadoop
+  
+ 
+- name: Step 15 | verify namenode format status
+  shell: '{{ hadoop_namenode_cmd }} -status'
+  register: namenodestatus
+  sudo: False
+  tags: hadoop
+  
+- name: Step 16 | namenode result status
+  debug: msg="namenode showing success status"
+  when: namenodestatus|success
+  tags: hadoop
+
+- name: Step 17 | hdfs result status
+  debug: msg="namenode showing failed status"
+  when: namenodestatus|failed
+  tags: hadoop
+
+- name: Step 18 | start all nodes
+  command: '{{ hadoop_start_all_nodes }}'
+  sudo: False
+  tags: hadoop
+  
+- name: Step 19 | simulate long running op (15 sec), wait for up to 45, poll every 5
+  command: /bin/sleep 15
+  async: 45
+  poll: 5
+  tags: hadoop
+   
+- name: Step 20 | verify hdfs status
+  shell: '{{ hadoop_verify_hdfs_status }}'
+  register: hdfsstatus
+  sudo: False
+  tags: hadoop
+  
+- name: Step 21 | hdfs result status
+  debug: msg="HDFS showing success status"
+  when: hdfsstatus|success
+  tags: hadoop
+
+- name: Step 22 | hdfs result status
+  debug: msg="HDFS showing failed status"
+  when: hdfsstatus|failed
+  tags: hadoop

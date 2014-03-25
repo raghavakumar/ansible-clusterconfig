@@ -1,0 +1,12 @@
+[program:cassandra]
+command=sudo /opt/apache-cassandra-2.0.4/bin/cassandra -f
+user=root
+autostart=true
+autorestart=true
+startsecs=10
+startretries=999
+log_stdout=true
+log_stderr=true
+logfile=/var/log/cassandra/cassandra.out
+logfile_maxbytes=20MB
+logfile_backups=10

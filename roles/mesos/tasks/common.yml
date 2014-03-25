@@ -1,0 +1,18 @@
+---
+
+- name: Common Step 1 | Copy mesos package from template src  based on boolean value
+  template: src={{ item.src }} dest={{ item.dest }} mode=0644 
+  with_items:
+    - { src: '{{ template_mesos_package }}', dest: '{{ mesos_download_path }}' }
+  when: mesos_download_status
+  tags: mesos
+
+- name: Step 2 | Download mesos from external url based on boolean value
+  get_url: url={{ mesos_download_url }} dest={{ mesos_download_path }} mode=655  
+  when: not mesos_download_status
+  tags: mesos
+  
+#&& sudo rm -rf *.tar.gz *.tar.gz*
+- name: common Step 3 | Install mesos
+  shell: creates={{ mesos_path }} chdir='{{ mesos_download_path }}' sudo tar -xvzf '{{ mesos_version_package }}' '{{ mesos_name }}' && sudo chmod -R 777 '{{ mesos_name }}' && sudo chown -R {{ ansible_ssh_user }}:root '{{ mesos_name }}'
+  tags: mesos

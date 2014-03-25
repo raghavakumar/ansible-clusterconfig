@@ -1,0 +1,12 @@
+---
+# file: roles/zookeepers/handlers/main.yml
+
+- name: start zookeeper
+  #service: name=zookeeper-server state=restarted
+  shell: cd '{{ zookeeper_bin_dir }}' && sudo '{{ zookeeper_start_script }}' start
+  ignore_errors: yes
+
+- name: restart zookeeper
+  #service: name=zookeeper-server state=restarted
+  shell: cd '{{ zookeeper_bin_dir }}' && sudo '{{ zookeeper_start_script }}' restart
+  ignore_errors: yes

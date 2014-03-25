@@ -1,0 +1,65 @@
+#hadoop Server vars
+
+# Set hadoop version
+hadoop_version: hadoop-1.0.4
+
+# Set whether to copy hadoop from local or from external url
+hadoop_download_local: false
+
+# set hadoop download path
+hadoop_download_path: /opt
+
+# set hadoop configuration path
+hadoop_path: /usr/local
+
+#### Feel free to modify below variables if required ####
+
+# Set hadoop version tar.gz
+hadoop_version_package: '{{ hadoop_version }}.tar.gz'
+
+# Set hadoop download url, if hadoop_download_local set to "false"
+hadoop_download_url: http://archive.apache.org/dist/hadoop/core/{{ hadoop_version }}/{{ hadoop_version_package }}
+
+# set template hadoop package
+template_hadoop_package: '{{ hadoop_version_package }}'
+
+# set template bash aliases package
+template_bash_aliases: '.bash_aliases'
+
+# set template hadoop-env.sh
+template_hadoop_env_file: 'hadoop-env.sh'
+
+# set template core-site.xml
+template_hadoop_core_site_xmlfile: 'core-site.xml'
+
+# set template hdfs-site.xml
+template_hadoop_hdfs_site_xmlfile: 'hdfs-site.xml'
+
+# set template mapred-site.xml
+template_hadoop_mapred_site_xmlfile: 'mapred-site.xml'
+
+
+# set java home path
+java_home_path: $(readlink -f /usr/bin/java | sed "s:bin/java::")
+
+# set hadoop configuration path
+hadoop_conf_path: '{{ hadoop_path }}/hadoop/conf'
+
+# set hadoop namenode command
+hadoop_namenode_cmd: '{{ hadoop_path }}/hadoop/bin/hadoop namenode'
+
+# hadoop start all nodes
+hadoop_start_all_nodes: '{{ hadoop_path }}/hadoop/bin/start-all.sh'
+
+hadoop_verify_hdfs_status: '{{ hadoop_path }}/hadoop/bin/hadoop fs -ls /'
+
+# set envlist to set in .bashrc_aliases file
+env_line_list: ['export HADOOP_PREFIX=/usr/local/hadoop', 'export JAVA_HOME={{ java_home_path }}', 'export PATH=$PATH:$HADOOP_PREFIX/bin']
+
+# set bash_aliases filename
+user_bashpath: '~/{{ template_bash_aliases }}'
+
+# create /app/hadoop/tmp directory for hadoop data directory
+hadoop_data_dir: '/app/hadoop/tmp'
+
+#install_list: ['openjdk-7-jdk']

@@ -1,0 +1,77 @@
+---
+
+- name: Step 1 | Copy spark package from template src IF mesos_download_local varaible set to true
+  template: src={{ item.src }} dest={{ item.dest }} mode=0644 
+  with_items:
+    - { src: "{{ spark_version_zip_package }}", dest: "{{ spark_download_dir }}" }
+  when: spark_download_status
+  tags: spark
+  
+- name: Step 2 | Download spark from external url IF spark_download_local variable set to false  
+  get_url: url='{{ spark_download_url }}' dest='{{ spark_download_dir }}' mode=777
+  when: not spark_download_status  
+  tags: spark
+
+- name: Step 3 | Install spark
+  #shell: creates='/home/pramati/spark-0.9.0-incubating chdir=/home/pramati sudo tar -xzf spark-0.9.0-incubating.tgz spark-0.9.0-incubating && sudo rm -rf *.tar.gz *.tar.gz* && sudo chmod -R 777 spark-0.9.0-incubating && sudo chown -R {{ ansible_ssh_user }}:root spark-0.9.0-incubating
+  shell: creates='{{ spark_download_dir }}/{{ spark_version_package }}' chdir='{{ spark_download_dir }}' sudo tar -xzf '{{ spark_version_zip_package }}' '{{ spark_version_package }}' && sudo rm -rf *.tar.gz *.tar.gz* && sudo chmod -R 777 {{ spark_version_package }} && sudo chown -R {{ ansible_ssh_user }}:root {{ spark_version_package }}
+  tags: spark
+  
+- name: Step 4 | spark sbt assembly
+  shell: cd '{{ spark_download_dir }}/{{ spark_version_package }}' && sbt/sbt assembly
+  tags: spark
+
+- name: Step 5 | spark make-distribution
+  shell: chdir='{{ spark_download_dir }}/{{ spark_version_package }}' ./make-distribution.sh --hadoop 1.0.4 && mv dist {{ spark_version_package }} && tar czf '{{ spark_version_zip_package }}' '{{ spark_version_package }}'
+  tags: spark
+
+- name: Step 6 | test whether hadoop folder exists
+  shell: chdir='{{ spark_download_dir }}' {{ hadoop_verify_dir_status }}
+  register: folderstatus  
+  tags: spark
+
+- name: Step 7 | test dir exist
+  debug: msg="test dir exists"
+  when: folderstatus|success
+  tags: spark
+
+- name: Step 8 | test dir not exists
+  debug: msg="test dir not exists"
+  when: folderstatus|failed
+  tags: spark
+
+- name: Step 9 | create hadoop directory
+  shell: chdir='{{ spark_download_dir }}'  '{{ hadoop_mkdir_cmd }}'
+  sudo: False
+  when: folderstatus|failed
+  tags: spark
+
+- name: Step 10 | test whether hadoop folder exists
+  shell: chdir='{{ spark_download_dir }}' {{ hadoop_verify_zipdir_status }}
+  register: zipfolderstatus
+  sudo: False
+  tags: spark
+
+- name: Step 11 | zipfolder  exist
+  debug: msg="zip folder exists"
+  when: zipfolderstatus|success
+  tags: spark
+
+- name: Step 12 | zipfolder not exists
+  debug: msg="zipfolder not exists"
+  when: zipfolderstatus|failed
+  tags: spark
+
+- name: Step 13 | create hadoop directory
+  shell: chdir='{{ spark_download_dir }}' {{ hadoop_put_cmd }}
+  sudo: False
+  when: zipfolderstatus|failed
+  tags: spark
+
+- name: Step 14 | copy template spark env file  
+  shell: chdir='{{ spark_conf_dir }}' cp spark-env.sh.template {{ template_spark_env }}
+  tags: spark
+
+- name: Step 15 | copy template spark-env.sh file
+  template: src='{{ template_spark_env }}' dest='{{ spark_env_dest_path }}' mode=0755
+  tags: spark

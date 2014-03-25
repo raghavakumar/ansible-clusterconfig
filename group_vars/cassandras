@@ -1,0 +1,45 @@
+#Cassandra vars
+
+# Set cassandra Version. Below download url will fetch the exact version from cassandra stable section
+cassandra_version: apache-cassandra-2.0.4
+
+# Set cassandra download path
+cassandra_home_path: /opt
+
+# Set Cassandra Version package
+cassandra_version_package: '{{ cassandra_version }}-bin.tar.gz'
+
+# User can modify below variables if any changes required.
+
+#cassandra download url using CURL
+cassandra_download_url: 'https://archive.apache.org/dist/cassandra/2.0.4/{{ cassandra_version_package }}'
+
+# /var/log/cassandra folder path
+var_log_cassandra: /var/log/cassandra
+
+# /var/lib/cassandra folder path
+var_lib_cassandra: /var/lib/cassandra
+
+# Cassandra Conf Path
+cassandra_conf_path: '{{ cassandra_home_path }}/{{ cassandra_version }}/conf/'
+
+# Cassandra Bin Path
+cassandra_bin_path: '{{ cassandra_home_path }}/{{ cassandra_version }}/bin/'
+
+# Cassandra Template File
+template_cassandra_file: cassandra.yaml
+
+# Cassandra Template supervisor file
+template_cassandra_supervisor_file: etc_supervisor.d_cassandra.conf.j2
+
+# Cassandra supervisor dest filepath
+cassandra_supervisor_dest_filepath: /etc/supervisor/conf.d/cassandra.conf
+
+# Install list of below mentioned packages
+install_list: [git, curl, python-pycurl, software-properties-common, openjdk-7-jdk, supervisor]
+
+# kill process list before installing/configuring cassandra
+kill_process_list: [cassandra, java]
+
+# delete existing files before installing/configuring cassandra
+file_list: ['{{ var_log_cassandra }}', '{{ var_lib_cassandra }}']

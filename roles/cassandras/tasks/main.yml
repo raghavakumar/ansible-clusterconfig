@@ -1,0 +1,57 @@
+---
+# file: roles/cassandras/tasks/main.yml
+
+- name: Step 1 | Update apt-get
+  shell: sudo apt-get update
+  tags: cassandras
+
+- name: Step 2 | Install requried Softwares
+  apt: pkg={{ item }} state=present
+  with_items:  $install_list
+  tags: cassandras  
+  
+- name: Step 3 | Kill existing cassandra & java process before installing Cassandra  
+  shell: ps -ef | awk '/{{ item }}/ && !/awk/ {print $2}' | xargs -r sudo kill -9
+  with_items:  $kill_process_list
+  tags: cassandras  
+
+- name: Step 4 | delete cassandra rleated files if exists    
+  file: name={{ item }} state=absent
+  with_items:  $file_list
+  tags: cassandras
+  
+- name: Step 5 | Download Cassandra
+  get_url: url='{{ cassandra_download_url }}' dest='{{ cassandra_home_path }}' mode=655
+  tags: cassandras
+
+- name: Step 6 | Install Cassandra
+  shell: creates='{{ var_lib_cassandra }}' chdir='{{ cassandra_home_path }}' tar -xvzf '{{ cassandra_version_package }}' && sudo rm -rf *.tar.gz *.tar.gz* && sudo chmod -R 655 '{{ cassandra_version }}' && sudo mkdir '{{ var_lib_cassandra }}' && sudo mkdir '{{ var_log_cassandra }}' && sudo chown -R $USER:$GROUP '{{ var_lib_cassandra }}' && sudo chown -R $USER:$GROUP '{{ var_log_cassandra }}'
+  tags: cassandras
+
+- name: Step 7 | add a new string at the end of the file
+  lineinfile: dest='{{ cassandra_conf_path }}cassandra-env.sh'
+              regexp=''
+              insertafter=EOF
+              line='JVM_OPTS="$JVM_OPTS -Djava.rmi.server.hostname={{ inventory_hostname }}"'  
+  tags: cassandras
+  
+- name: Step 8 | configure Cassandra yaml in /opt/apache-cassandra-2.0.4/conf  
+  template: src={{ item.src }} dest={{ item.dest }} owner=root group=root mode=0644
+  with_items:
+    - { src: '{{ template_cassandra_file }}', dest: '{{ cassandra_conf_path }}{{ template_cassandra_file }}' }
+    - { src: '{{ template_cassandra_supervisor_file }}', dest: '{{ cassandra_supervisor_dest_filepath }}' }  
+  tags: cassandras
+  
+- name: Step 9 | start cassandra supervisor service
+  shell: sudo supervisorctl update && sudo supervisorctl start cassandra
+  tags: cassandras
+
+- name: Step 10 | simulate long running op (15 sec), wait for up to 45, poll every 5
+  command: /bin/sleep 15
+  async: 45
+  poll: 5
+  tags: cassandras
+  
+- name: Step 11 | Verify nodetool status
+  shell: cd '{{ cassandra_bin_path }}' && sudo ./nodetool status
+  tags: cassandras
