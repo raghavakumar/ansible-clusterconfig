@@ -1,0 +1,33 @@
+---
+# This playbook deploys  Tomcat, Mysql, Terracotta servers on Ubuntu. 
+
+- hosts: zookeepers 
+  accelerate: "{{ accelerate }}"
+  gather_facts: false
+  user: clusterconfig
+  sudo: true
+  roles:    
+      - zookeepers 
+
+- hosts: cassandras 
+  accelerate: "{{ accelerate }}"
+  gather_facts: false
+  user: clusterconfig
+  sudo: true
+  roles:    
+      - cassandras
+
+- hosts: spark 
+  accelerate: "{{ accelerate }}"
+  gather_facts: false 
+  user: clusterconfig
+  sudo: true
+  vars_files:
+      - group_vars/mesos
+      - group_vars/hadoop
+      - group_vars/spark
+  roles:
+      - java
+      - mesos
+      - hadoop  
+      - spark
