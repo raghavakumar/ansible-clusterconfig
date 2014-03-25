@@ -10,15 +10,15 @@ Spark     (on Single node)
 
 Requirements:
 
-    Ansible 1.5 or later (pip install ansible)
+    Ansible 1.4.4 or later (pip install ansible)
     6 + 1 Ubuntu 12.04 LTS/13.04/13.10 - see ubuntu-netboot-tftp if you need automated server installation
-    clusterconfig user in sudo group without sudo password prompt (see Bootstrapping section below)
+    "clusterconfig" user in sudo group without sudo password prompt (see Bootstrapping section below)
     
 TBD: 
 
 -> Need to add shell script to configure ansible on control machine.
 
--> Modify Spark Ansible script to suit to Multi-node environement.
+-> Modify Spark Ansible script to suit for Multi-node environement.
 	
 Adding hosts:
 
