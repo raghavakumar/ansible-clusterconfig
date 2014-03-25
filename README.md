@@ -16,7 +16,8 @@ Requirements:
     
 TBD: 
 
--> Need to add shell script to configure ansible on control machine. 
+-> Need to add shell script to configure ansible on control machine.
+
 -> Modify Spark Ansible script to suit to Multi-node environement.
 	
 Adding hosts:
