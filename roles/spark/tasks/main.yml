@@ -1,7 +1,7 @@
 ---
 
 - name: Step 1 | Copy spark package from template src IF mesos_download_local varaible set to true
-  template: src={{ item.src }} dest={{ item.dest }} mode=0644 
+  copy: src={{ item.src }} dest={{ item.dest }} mode=0644 
   with_items:
     - { src: "{{ spark_version_zip_package }}", dest: "{{ spark_download_dir }}" }
   when: spark_download_status
